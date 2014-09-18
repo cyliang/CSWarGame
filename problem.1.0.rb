@@ -50,11 +50,11 @@ class Metasploit3 < Msf::Auxiliary
 		password = datastore['PASSWORD']
 		if account.empty?
 			print "Please enter your account: "
-			account = gets
+			account = gets.chomp!
 		end
 		if password.empty?
 			print "Please enter your password: "
-			password = STDIN.noecho(&:gets)[0..-2]
+			password = STDIN.noecho(&:gets).chomp!
 		end
 
 		puts "\nPlease wait for the result..."
