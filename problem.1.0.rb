@@ -58,12 +58,22 @@ class Metasploit3 < Msf::Auxiliary
 		end
 
 		puts "\nPlease wait for the result..."
-		Net::SSH.start(whost, account, :password => password) do |ssh|
-			ssh.exec!("{ echo '#{account}'; sleep 1; } | telnet #{thost} #{tport} | grep 'key: ' | cut -d ' ' -f 2") do |ch2, stream, data|
-				if stream == :stdout
-					puts "Your key is: \e[1;33m#{data}\e[m"
+		begin
+			Net::SSH.start(whost, account, :password => password) do |ssh|
+				ssh.exec!("{ echo '#{account}'; sleep 1; } | telnet #{thost} #{tport} | grep 'key: ' | cut -d ' ' -f 2") do |ch2, stream, data|
+					if stream == :stdout
+						puts "Your key is: \e[1;33m#{data}\e[m"
+					end
+					if stream == :stderr && data =~ /Unable to connect to remote host/
+						puts "\e[1;31mThe target port #{thost}:#{tport} is not opened."
+						puts "Try click the \e[43mstart\e[m\e[1;31m or \e[43mrestart\e[m\e[1;31m button on the website.\e[m"
+					end
 				end
 			end
+
+		rescue Net::SSH::AuthenticationFailed
+			puts "\e[1;31mFail to login #{whost}"
+			puts "Your account or password may be wrong.\e[m"
 		end
 	end
 end
